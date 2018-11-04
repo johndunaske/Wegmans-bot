@@ -1,2 +1,2 @@
-# wegmans-voice-lookup
+# Wegmans Voice Lookup
 For UB Hacking
