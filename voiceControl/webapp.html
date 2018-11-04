@@ -1,0 +1,132 @@
+<html>
+<head>
+    <link rel="stylesheet" href="design.css">
+    <title>UB Hacking</title>
+</head>
+<body bgcolor="#58595b" class="body">
+    <h1 style="color:white; font-family:courier; text-align:center;"> Wegmans Voice Lookup</h1>
+
+    <div class="container">
+        <button class="btn" onclick="startDictation(event)">Click Me!</button>
+    </div>
+
+    <div class="oof" id="finalText"><h1 style="color:white; font-family:courier; text-align:center;"> Your information will appear here</h1></div>
+    <div class="oof2" id='inst'><h1 style="color:white; font-family:courier; text-align:center;">Click the button above, then say "find" followed by a food item.</h1></div>
+
+    <div class="oof3" id='voice'><h1 style="color:white; font-family:courier; text-align:center;"></h1></div>
+</body>
+</html>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+    var final_transcript = '';
+    var recognizing = false;
+
+
+    if ('webkitSpeechRecognition' in window) {
+
+        var recognition = new webkitSpeechRecognition();
+
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onstart = function () {
+            recognizing = true;
+        };
+
+        recognition.onerror = function (event) {
+            console.log(event.error);
+        };
+
+        recognition.onend = function () {
+            recognizing = false;
+        };
+
+        var findSpoken = false;
+        var x = ""
+
+        let nutt = "";
+        recognition.onresult = function (event) {
+            var interim_transcript = '';
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                if (findSpoken === true) {
+                    var searchTerm = event.results[i][0].transcript.split('find')[1];
+                    if (typeof (searchTerm) != "undefined" && searchTerm != "") {
+                        console.log("searchTerm = ", searchTerm);
+                        recognition.stop();
+                        console.log("recognition stopped !");
+                        searchTerm = searchTerm.trim();
+
+                        if (searchTerm == "me") {
+                            return;
+                        }
+
+
+                        const weggiesURL = 'https://api.wegmans.io/products/search?query=' + searchTerm + '&api-version=2018-10-18&subscription-key=a12ce7d680664c7d97017f45412bbc47';
+
+                        
+
+                        axios.get(weggiesURL)
+
+                            .then(function (response) {
+                                var returnStr = '';
+                                axios.get('https://api.wegmans.io' + response['data']['results'][0]['_links'][0]["href"] + '&subscription-key=a12ce7d680664c7d97017f45412bbc47')
+
+                                    .then(function (reply) {
+                                        var list = reply['data']['nutrients'];
+
+                                        for (var i in list) {
+                                            returnStr = returnStr + JSON.stringify(reply['data']['nutrients'][i]['type']) + ": " + JSON.stringify(reply['data']['nutrients'][i]['quantity']) + '\n';
+
+                                            finalText.innerHTML = returnStr;
+                                        }
+                                    })
+
+                                    .catch(function (error) {
+                                        console.log("Try again");
+                                    });
+                            })
+
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    }
+
+                }
+                if (event.results[i][0].transcript.includes("find")) {
+                    findSpoken = true;
+                }
+
+
+                if (event.results[i].isFinal) {
+                    final_transcript += event.results[i][0].transcript;
+                } else {
+                    interim_transcript += event.results[i][0].transcript;
+                }
+            }
+            final_transcript = capitalize(final_transcript);
+            finalText.innerHTML = linebreak(final_transcript)
+            voice.innerHTML = linebreak(interim_transcript);
+        };
+    }
+
+    var two_line = /\n\n/g;
+    var one_line = /\n/g;
+    function linebreak(s) {
+        return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+    }
+
+    function capitalize(s) {
+        return s.replace(s.substr(0, 1), function (m) { return m.toUpperCase(); });
+    }
+
+    function startDictation(event) {
+        if (recognizing) {
+            recognition.stop();
+            return;
+        }
+        final_transcript = '';
+        recognition.lang = 'en-US';
+        recognition.start();
+    }
+</script>

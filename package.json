@@ -1,0 +1,29 @@
+{
+  "name": "movie-chat-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johndunaske/Movie-Chat-Bot.git"
+  },
+  "author": "John Dunaske, Amogh Joshi, Spencer Szeto",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/johndunaske/Movie-Chat-Bot/issues"
+  },
+  "homepage": "https://github.com/johndunaske/Movie-Chat-Bot#readme",
+  "dependencies": {
+    "apiai": "^4.0.3",
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "jQuery": "^1.7.4",
+    "jquery": "^3.3.1",
+    "request": "^2.88.0",
+    "save": "^2.3.2"
+  }
+}
